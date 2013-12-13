@@ -190,7 +190,7 @@ end
 multiply(2, 3)
 
 # top-level methods are private methods of Object - see exception
-Object.multiply(2, 3)
+xxx(2, 3)
 
 NEXT?
 
@@ -265,5 +265,252 @@ end
 ac = AddingCalculator.new
 
 ac.add(10, 2)
+
+NEXT?
+
+##########################
+
+SECTION 'MISC' / 'Assignment, interpolation'
+
+# parallel assignment
+
+width, height, depth = [1000, 2250, 250]
+
+height
+
+# string interpolation
+"hello #{'dlrow'.reverse}"
+
+o = Object.new
+
+# interpolation uses `to_s` method
+def o.to_s
+  'a new object'
+end
+
+"here is #{o}"
+
+# IRB uses `inspect` method
+def o.inspect
+  '[my object]'
+end
+
+o
+
+NEXT?
+
+##########################
+
+SECTION 'MISC' / 'Printing'
+
+# printing strings
+
+x = 128
+
+while x < 1000
+  puts "x is #{x}"
+  x=x*2
+end
+
+NEXT?
+
+##########################
+
+SECTION 'MISC' / 'Variadic args'
+
+# variadic methods `*words` is an array
+def join_with_commas(*words)
+  words.join(', ')
+end
+
+join_with_commas('one', 'two', 'three')
+
+def join_with_commas(before, *words, after)
+  before + words.join(', ') + after
+end
+
+join_with_commas('Testing: ', 'one', 'two', 'three', '.')
+
+# like Scala ``: *``
+join_with_commas(*['Testing: ', 'one', 'two', 'three', '.'])
+
+# * in parallel assignments
+before, *words, after = ['Testing: ', 'one', 'two', 'three', '.']
+
+words
+
+NEXT?
+
+##########################
+
+SECTION 'MISC' / 'Blocks'
+
+# blocks are called via yield
+def do_three_times
+  yield
+  yield
+  yield
+end
+
+do_three_times { puts 'hello' }
+
+# blocks can take arguments
+def do_three_times
+  yield('first')
+  yield('second')
+  yield('third')
+end
+
+# yield returns the result of executing the block
+def number_names
+  [yield('one'), yield('two'), yield('three')].join(', ')
+end
+
+number_names { |name| name.upcase.reverse }
+
+NEXT?
+
+##########################
+
+SECTION 'MISC' / 'Enumerable - 1'
+
+(1..10).count { |number| number.even? }
+
+(1..10).select { |number| number.even? }
+
+(1..10).any? { |number| number < 8 }
+
+(1..10).all? { |number| number < 8 }
+
+(1..5).each do |number|
+  if number.even?
+    puts "#{number} is even"
+  else
+    puts "#{number} is odd"
+  end
+end
+
+(1..10).map { |number| number * 3 }
+
+# &:message = { |object| object.message }
+(1..10).select(&:even?)
+
+['one', 'two', 'three'].map(&:upcase)
+
+NEXT?
+
+##########################
+
+SECTION 'MISC' / 'Enumerable - 2'
+
+# #flat_map
+['one', 'two', 'three'].map(&:chars)
+
+['one', 'two', 'three'].flat_map(&:chars)
+
+# inject = fold
+(1..10).inject(0) { |result, number| result + number }
+
+(1..10).inject(1) { |result, number| result * number }
+
+['one', 'two', 'three'].inject('Words:') { |result, word| "#{result} #{word}" }
+
+NEXT?
+
+##########################
+
+SECTION 'MISC' / 'Struct'
+
+# Struct = almost cases classes
+class Point < Struct.new(:x, :y)
+
+  def +(other_point)
+    Point.new(x + other_point.x, y + other_point.y)
+  end
+
+  def inspect
+    "#<Point (#{x}, #{y})>"
+  end
+
+end
+
+a = Point.new(2, 3)
+
+b = Point.new(10, 20)
+
+a + b
+
+# responding to x, x =
+a.x
+a.x = 35
+a + b
+
+# ==
+Point.new(4, 5) == Point.new(4, 5)
+Point.new(4, 5) == Point.new(6, 7)
+
+NEXT?
+
+##########################
+
+SECTION 'MISC' / 'Monkey Patching'
+
+# extending "existing" classes
+class Point
+  def -(other_point)
+    Point.new(x - other_point.x, y - other_point.y)
+  end
+end
+
+Point.new(10, 15) - Point.new(1, 1)
+
+# everything is extensible, including built-in classes
+class String
+  def shout
+    upcase + '!!!'
+  end
+end
+
+'hello world'.shout
+
+NEXT?
+
+##########################
+
+SECTION 'MISC' / 'CONSTANT'
+
+# var, which name starts with capital is CONSTANT
+NUMBERS = [4, 8, 15, 16, 23, 42]
+
+class Greetings
+  ENGLISH = 'hello'
+  FRENCH = 'bonjour'
+  GERMAN = 'guten Tag'
+end
+
+NUMBERS.last
+
+Greetings::FRENCH
+
+# NOTE : classes and modules are constants!
+
+NEXT?
+
+##########################
+
+SECTION 'MISC' / 'REMOVING CONSTANTS'
+
+NUMBERS.last
+
+# remove_const is a private method, so sending a message
+Object.send(:remove_const, :NUMBERS)
+
+NUMBERS.last
+
+Greetings::GERMAN
+
+Object.send(:remove_const, :Greetings)
+
+Greetings::GERMAN
 
 BYE!
